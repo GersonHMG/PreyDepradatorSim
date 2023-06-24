@@ -9,7 +9,7 @@ void mainLoop(){
     
     WINDOW.create( sf::VideoMode( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, 32), "PredatorPrey" );
     WINDOW.setFramerateLimit( Config::FPS );
-    World::init();
+    World new_world = World();
 
     while (WINDOW.isOpen()) {
         
@@ -18,12 +18,12 @@ void mainLoop(){
             if (event.type == sf::Event::Closed) { WINDOW.close(); }
         }
         // Process
-        World::process();
-
+        new_world.process();
+        
         // Draw
         WINDOW.clear( sf::Color(105,105,105) );
-        World::render(&WINDOW);
-    
+        new_world.render( &WINDOW );
+
         WINDOW.display();
     }
 }
