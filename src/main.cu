@@ -2,6 +2,8 @@
 #include <iostream>
 #include "config.hpp"
 #include "world_aos.cuh"
+#include "world_shared.cuh"
+#include "world_cpu.cuh"
 
 void renderGrid(sf::RenderWindow* window, int size_x, int size_y){
     int num_lines = size_y + size_x - 2;
@@ -79,7 +81,7 @@ void mainLoop(){
     
     WINDOW.create( sf::VideoMode( SCREEN_WIDTH, SCREEN_HEIGHT, 32), "PredatorPrey" );
     WINDOW.setFramerateLimit( 30 );
-    init();
+    CudaWorld::init();
     while (WINDOW.isOpen()) {
         
         sf::Event event;    
@@ -87,21 +89,104 @@ void mainLoop(){
             if (event.type == sf::Event::Closed) { WINDOW.close(); }
         }
         // Process
-        process();
+        CudaWorld::process();
 
         // Draw
         WINDOW.clear( sf::Color(105,105,105) );
         
-        render(getWorld() , &WINDOW);
+        render( CudaWorld::getWorld() , &WINDOW);
 
         WINDOW.display();
     }
-    end();
+     CudaWorld::end();
 }
+
+void testCudaWorld(){
+
+    float time;
+    cudaEvent_t start, stop;
+    CudaWorld::init();
+
+    cudaEventCreate(&start) ;
+    cudaEventCreate(&stop) ;
+    cudaEventRecord(start, 0) ;
+
+    for(int i = 0; i < 5000; i++){
+        CudaWorld::process();
+    }
+
+    cudaEventRecord(stop, 0) ;
+    cudaEventSynchronize(stop) ;
+    cudaEventElapsedTime(&time, start, stop) ;
+
+    printf("Time to generate:  %3.1f ms \n", time);
+}
+
+
+void testCudaWorldShared(){
+
+    float time;
+    cudaEvent_t start, stop;
+    CudaWorldShared::init();
+
+    cudaEventCreate(&start) ;
+    cudaEventCreate(&stop) ;
+    cudaEventRecord(start, 0) ;
+
+    for(int i = 0; i < 5000; i++){
+        CudaWorldShared::process();
+    }
+
+    cudaEventRecord(stop, 0) ;
+    cudaEventSynchronize(stop) ;
+    cudaEventElapsedTime(&time, start, stop) ;
+
+    printf("Time to generate:  %3.1f ms \n", time);
+}
+
+
+void testCPUWorld(){
+
+    CPUWorld::init();
+    clock_t t;
+    t = clock();
+
+    for(int i = 0; i < 5000; i++){
+        CPUWorld::process();
+    }
+
+    
+    t = clock() - t;
+    double time_taken = ((double)t); // in seconds
+
+    
+    printf("CPU %f [ms] \n", time_taken);
+    CPUWorld::end();
+}
+
+
+void test(int version){
+    switch (version){
+    case 0:
+        testCudaWorld();
+        break;
+    case 1:
+        testCudaWorldShared();
+        break;
+    case 2:
+        testCPUWorld();
+        break;
+
+    }
+
+}
+
+
 
 int main(){
     std::cout<< "Running..." << std::endl;
-    mainLoop();
-    
+    //mainLoop();
+    test(0);
+
     return 0;
 }

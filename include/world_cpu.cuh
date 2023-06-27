@@ -5,59 +5,50 @@
 #include "agent_aos.cuh"
 #include "config.hpp"
 
-namespace CudaWorld{
+namespace CPUWorld{
 
 
-Agent* d_old_world; // device old world
-Agent* d_new_world; // device new world
-Agent* h_world; //host world
+Agent* h_old_world;
+Agent* h_new_world;
 
 
 void init(){
-    h_world = (Agent*) malloc( sizeof(Agent)*WORLD_DIMENSION*WORLD_DIMENSION );
+    h_old_world = (Agent*) malloc( sizeof(Agent)*WORLD_DIMENSION*WORLD_DIMENSION );
+    h_new_world = (Agent*) malloc( sizeof(Agent)*WORLD_DIMENSION*WORLD_DIMENSION );
     printf("Initializing... \n");
     //Init world
     // Generate world
-    Agent* t_world = (Agent*) malloc( sizeof(Agent)*WORLD_DIMENSION*WORLD_DIMENSION );
     for (int i = 0; i < WORLD_DIMENSION*WORLD_DIMENSION ; i++){
         // Initialize 
-        t_world[i].cell_type = EMPTY;
+        h_old_world[i].cell_type = EMPTY;
+        h_new_world[i].cell_type = EMPTY;
     } 
     
+    // Preys
     int n_preys = 20;
     for (int i = 0; i < n_preys ; i++){
         int random_coord = rand()%(WORLD_DIMENSION*WORLD_DIMENSION );
-        // Initialize 
-        t_world[i].cell_type = PREY;
-        t_world[i].t_reproduce = 0;
+        h_old_world[i].cell_type = PREY;
     }
     
     int offset = 5050;
-    t_world[offset+ 1].cell_type = PREY;
-    t_world[offset+ WORLD_DIMENSION + 2].cell_type = PREY;
-    t_world[offset+ WORLD_DIMENSION*2].cell_type = PREY;
-    t_world[offset+ WORLD_DIMENSION*2 + 1].cell_type = PREY;
-    t_world[offset+ WORLD_DIMENSION*2 + 2].cell_type = PREY;
+    h_old_world[offset+ 1].cell_type = PREY;
+    h_old_world[offset+ WORLD_DIMENSION + 2].cell_type = PREY;
+    h_old_world[offset+ WORLD_DIMENSION*2].cell_type = PREY;
+    h_old_world[offset+ WORLD_DIMENSION*2 + 1].cell_type = PREY;
+    h_old_world[offset+ WORLD_DIMENSION*2 + 2].cell_type = PREY;
 
-
+    // Predator
     int n_predator = 100;
     for (int i = 450; i < 450 + n_predator ; i++){
         int random_coord = rand()%(WORLD_DIMENSION*WORLD_DIMENSION );
         // Initialize 
-        t_world[i].cell_type = PREDATOR;
-        t_world[i].t_reproduce = 0;
+        h_old_world[i].cell_type = PREDATOR;
     }
 
-    cudaMalloc(&d_old_world, sizeof(Agent)*WORLD_DIMENSION*WORLD_DIMENSION );
-    cudaMemcpy( d_old_world, t_world, sizeof(Agent)*WORLD_DIMENSION*WORLD_DIMENSION, cudaMemcpyHostToDevice);
-    
-
-    cudaMalloc(&d_new_world, sizeof(Agent)*WORLD_DIMENSION*WORLD_DIMENSION );
-    cudaMemcpy( d_new_world, t_world, sizeof(Agent)*WORLD_DIMENSION*WORLD_DIMENSION, cudaMemcpyHostToDevice);
-    free(t_world);
 }
 
-__device__ void processCell(Agent* old_world, Agent* new_world, Vector2 cell_pos){
+void processCell(Agent* old_world, Agent* new_world, Vector2 cell_pos){
     int neighboors_cells = 0;
     int ad_pred = 0;
     int ad_prey = 0;
@@ -127,36 +118,41 @@ __device__ void processCell(Agent* old_world, Agent* new_world, Vector2 cell_pos
 }
 
 
-__global__ void device_process(Agent* old_world, Agent* new_world){
-    int tId = threadIdx.x + blockIdx.x * blockDim.x ;
-    if(tId < WORLD_DIMENSION*WORLD_DIMENSION){
-        Vector2 from = {tId%WORLD_DIMENSION, tId/WORLD_DIMENSION };
+void host_process(Agent* old_world, Agent* new_world, int cell_index){
+    if(cell_index < WORLD_DIMENSION*WORLD_DIMENSION){
+        Vector2 from = {cell_index%WORLD_DIMENSION, cell_index/WORLD_DIMENSION };
         processCell(old_world, new_world, from);
     }
 }
 
 int i = 0;
 void process(){
-    i +=1 ;
-    if(i%2 == 1){
-        device_process<<<WORLD_DIMENSION*WORLD_DIMENSION, 1>>>(d_old_world, d_new_world);
-    }else{
-         device_process<<<WORLD_DIMENSION*WORLD_DIMENSION, 1>>>(d_new_world, d_old_world);
+
+    for(int x = 0; x < WORLD_DIMENSION; x ++ ){
+        for(int y = 0; y < WORLD_DIMENSION; y++ ){
+            i +=1 ;
+            if(i%2 == 1){
+                host_process(h_old_world, h_new_world, x + y*WORLD_DIMENSION);
+            }else{
+                host_process(h_old_world, h_new_world, x + y*WORLD_DIMENSION);
+            }
+        }
     }
-    
 }
 
 
 void end(){
-    cudaFree(d_old_world);
-    cudaFree(d_new_world);
-    free(h_world);
+    free(h_old_world);
+    free(h_new_world);
 }
 
 
 Agent* getWorld(){
-    cudaMemcpy(h_world, d_old_world, sizeof(Agent)*WORLD_DIMENSION*WORLD_DIMENSION , cudaMemcpyDeviceToHost);
-    return h_world;
+    if(i%2 == 1){
+        return h_old_world;
+    }
+    return h_new_world;
+    
 }
 
 
