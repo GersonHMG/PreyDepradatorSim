@@ -5,11 +5,24 @@ Draw::Draw(sf::RenderWindow *w){
     Draw::window = w;
 }
 
+
 void Draw::renderPrey(int x, int y){
     sf::CircleShape sprite(50);
     sprite.scale(sf::Vector2f(0.2f,0.2f));
     sf::Color prey_color = sf::Color::Green;
-    prey_color.a = 100;
+    sprite.setFillColor( prey_color );
+    // Local to global
+    float center = (Config::SCREEN_WIDTH/Config::WORLD_DIMENSION)*0.5;
+    float x_f = (Config::SCREEN_WIDTH/Config::WORLD_DIMENSION)*x + center;
+    float y_f = (Config::SCREEN_HEIGHT/Config::WORLD_DIMENSION)*y + center;
+    sprite.setPosition( sf::Vector2f( x_f, y_f ) );
+    Draw::window->draw(sprite);
+}
+
+void Draw::renderPredator(int x, int y){
+    sf::CircleShape sprite(50);
+    sprite.scale(sf::Vector2f(0.2f,0.2f));
+    sf::Color prey_color = sf::Color::Red;
     sprite.setFillColor( prey_color );
     // Local to global
     float center = (Config::SCREEN_WIDTH/Config::WORLD_DIMENSION)*0.5;
@@ -47,14 +60,21 @@ void Draw::renderGrid(int size_x, int size_y){
 }
 
 
-void Draw::render(Vector2* preys_pos, int n_preys){
+void Draw::render(Agent* world){
+    int size = Config::WORLD_DIMENSION*Config::WORLD_DIMENSION;
     renderGrid(Config::WORLD_DIMENSION, Config::WORLD_DIMENSION);
 
-    for (int i = 0; i < n_preys; i++){
-        renderPrey( preys_pos[i].x, preys_pos[i].y );
+    for (int i = 0; i < size; i++){
+        switch (world[i].cell_type){
+        case PREY:
+            renderPrey( i%Config::WORLD_DIMENSION , i/Config::WORLD_DIMENSION );
+            break;
+        case PREDATOR:
+            renderPredator( i%Config::WORLD_DIMENSION , i/Config::WORLD_DIMENSION );
+            break;
+        }
     }
     
-    free(preys_pos);
 }
 
 /*

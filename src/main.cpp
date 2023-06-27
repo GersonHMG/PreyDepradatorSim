@@ -23,7 +23,8 @@ void mainLoop(){
         
         // Draw
         WINDOW.clear( sf::Color(105,105,105) );
-        draw.render( new_world.getPreysPos(), new_world.getNPreys() );
+
+        draw.render( new_world.getWorld() );
 
         WINDOW.display();
     }

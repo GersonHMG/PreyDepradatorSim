@@ -6,47 +6,53 @@ World::World(){
     World::dimension_y = Config::WORLD_DIMENSION;
 
     // Generate world
-    world = (int*) malloc( sizeof(int)*dimension_x*dimension_y );
+    world = (Agent*) malloc( sizeof(Agent)*dimension_x*dimension_y );
     for (int i = 0; i < dimension_x*dimension_y ; i++){
-        world[i] = 0;
+        // Initialize 
+        world[i].cell_type = EMPTY;
     } 
 
     // Spawn preys
-    n_preys = 1;
-    preys = (Prey*) malloc( sizeof(Prey)*n_preys );
-    new ( &preys[0] ) Prey(Vector2{50,50}, this);
+    int n_preys = 1;
+    for (int i = 0; i < n_preys ; i++){
+        int random_coord = rand()%(dimension_x*dimension_y);
+        // Initialize 
+        world[i].cell_type = PREY;
+        world[i].t_reproduce = 0;
+    }
 }
 
 void World::process(){
-    for (int i = 0; i < World::n_preys; i++){
-        preys[i].process(0);
+    // For each cell
+    for (int i = 0; i < dimension_x*dimension_y; i++){
+        Vector2 from = {i%dimension_x, i/dimension_x };
+        switch (world[i].cell_type){
+            case PREDATOR:
+                moveAgent(world, world[i], from, randomCell(from.x, from.y) );
+                break;
+            case PREY:
+                processPrey(world, &world[i],  from);
+                moveAgent(world, world[i], from, randomCell(from.x, from.y) );
+                break;
+        }
     }
-} 
-
-void World::spawnPrey(Vector2 pos){
-    World::preys = (Prey*) realloc(World::preys, sizeof(Prey)*(World::n_preys + 1) );
-    new ( &preys[World::n_preys] ) Prey(pos, this);
-    n_preys += 1;
 }
 
-int World::getNPreys(){
-    return n_preys;
-}
 
-Vector2* World::getPreysPos(){
-    Vector2* pos = (Vector2*) malloc( sizeof(Vector2)*n_preys );
-    for (int i = 0; i < n_preys; i++){
-        pos[i] = Vector2{ preys[i].pos.x, preys[i].pos.y}; 
+bool World::moveAgent(Agent* world, Agent agent, Vector2 from, Vector2 to){
+    if(world[ to.x + to.y*dimension_x ].cell_type == EMPTY){
+        // Copy
+        world[ to.x + to.y*dimension_x ] = world[ from.x + from.y*dimension_x ];
+        // Delete
+        world[ from.x + from.y*dimension_x ].cell_type = EMPTY;
+        return true;
     }
-    return pos;
+    return false;
 }
 
-/*
-void World::render(sf::RenderWindow *window){
-    drawGrid(window);
-    for (int i = 0; i < n_preys; i++){
-        preys[i].render(window);
-    }
-    drawStates(window);
+
+
+
+Agent* World::getWorld(){
+    return world;
 }
-*/
