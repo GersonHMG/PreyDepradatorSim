@@ -44,6 +44,20 @@ void renderPrey(sf::RenderWindow* window, int x, int y){
     window->draw(sprite);
 }
 
+void renderPredator(sf::RenderWindow* window, int x, int y){
+    sf::CircleShape sprite(50, 4);
+    sprite.rotate(45);
+    sprite.scale(sf::Vector2f(0.1f,0.1f));
+    sf::Color prey_color = sf::Color::Red;
+    sprite.setFillColor( prey_color );
+    // Local to global
+    float center = (SCREEN_WIDTH/WORLD_DIMENSION)*0.5;
+    float x_f = (SCREEN_WIDTH/WORLD_DIMENSION)*x + center;
+    float y_f = (SCREEN_HEIGHT/WORLD_DIMENSION)*y + center;
+    sprite.setPosition( sf::Vector2f( x_f, y_f ) );
+    window->draw(sprite);
+}
+
 void render(Agent* world, sf::RenderWindow* window){
     int size = WORLD_DIMENSION*WORLD_DIMENSION;
     renderGrid(window, WORLD_DIMENSION,WORLD_DIMENSION);
@@ -54,7 +68,7 @@ void render(Agent* world, sf::RenderWindow* window){
             renderPrey(window, i%WORLD_DIMENSION , i/WORLD_DIMENSION );
             break;
         case PREDATOR:
-            //renderPredator( i%Config::WORLD_DIMENSION , i/Config::WORLD_DIMENSION );
+            renderPredator(window, i%WORLD_DIMENSION , i/WORLD_DIMENSION );
             break;
         }
     }

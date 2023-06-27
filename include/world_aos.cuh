@@ -36,6 +36,15 @@ void init(){
     t_world[offset+ WORLD_DIMENSION*2 + 1].cell_type = PREY;
     t_world[offset+ WORLD_DIMENSION*2 + 2].cell_type = PREY;
 
+
+    int n_predator = 100;
+    for (int i = 450; i < 450 + n_predator ; i++){
+        int random_coord = rand()%(WORLD_DIMENSION*WORLD_DIMENSION );
+        // Initialize 
+        t_world[i].cell_type = PREDATOR;
+        t_world[i].t_reproduce = 0;
+    }
+
     cudaMalloc(&d_old_world, sizeof(Agent)*WORLD_DIMENSION*WORLD_DIMENSION );
     cudaMemcpy( d_old_world, t_world, sizeof(Agent)*WORLD_DIMENSION*WORLD_DIMENSION, cudaMemcpyHostToDevice);
     
@@ -47,6 +56,8 @@ void init(){
 
 __device__ void processCell(Agent* old_world, Agent* new_world, Vector2 cell_pos){
     int neighboors_cells = 0;
+    int ad_pred = 0;
+    int ad_prey = 0;
     // For each neighboor
     for (int x = -1; x < 2; x++){
         for (int y = -1; y < 2; y++){
@@ -56,33 +67,60 @@ __device__ void processCell(Agent* old_world, Agent* new_world, Vector2 cell_pos
             if( (x != 0 || y != 0) &&
                 old_world[ad_cell.x + ad_cell.y*WORLD_DIMENSION].cell_type != EMPTY){
                 neighboors_cells += 1;
+                if( old_world[ad_cell.x + ad_cell.y*WORLD_DIMENSION].cell_type == PREDATOR){
+                    ad_pred += 1;
+                }else if( old_world[ad_cell.x + ad_cell.y*WORLD_DIMENSION].cell_type == PREY){
+                    ad_prey += 1;
+                }
             }
         }
     }
-    //new_world[cell_pos.x + cell_pos.y*WORLD_DIMENSION].cell_type = old_world[cell_pos.x + cell_pos.y*WORLD_DIMENSION].cell_type;
     new_world[cell_pos.x + cell_pos.y*WORLD_DIMENSION].cell_type = EMPTY;
 
-    // Rules
     if(old_world[cell_pos.x + cell_pos.y*WORLD_DIMENSION].cell_type == EMPTY ){
-        // Reproduction
+            // Reproduction
         if(neighboors_cells >= 3){
-            new_world[cell_pos.x + cell_pos.y*WORLD_DIMENSION].cell_type = PREY;
-        }
-    }else{
-        if(neighboors_cells == 2){
-            // Stasis
-            new_world[cell_pos.x + cell_pos.y*WORLD_DIMENSION].cell_type = PREY;
-        }
-        else if(neighboors_cells < 2){
-            // Die Loliness
-            new_world[cell_pos.x + cell_pos.y*WORLD_DIMENSION].cell_type = EMPTY;
-        }
-        else if( neighboors_cells > 3){
-            // Overcrowding
-            new_world[cell_pos.x + cell_pos.y*WORLD_DIMENSION].cell_type = EMPTY;
+            if(ad_prey == neighboors_cells){
+                new_world[cell_pos.x + cell_pos.y*WORLD_DIMENSION].cell_type = PREY;
+            }else if( ad_pred == neighboors_cells) {
+                new_world[cell_pos.x + cell_pos.y*WORLD_DIMENSION].cell_type = PREDATOR;
+            }
+            
         }
     }
+
+    //new_world[cell_pos.x + cell_pos.y*WORLD_DIMENSION].cell_type = old_world[cell_pos.x + cell_pos.y*WORLD_DIMENSION].cell_type;
     
+    if(old_world[cell_pos.x + cell_pos.y*WORLD_DIMENSION].cell_type == PREY ){
+            // Rules prey
+            if(neighboors_cells == 2){
+                // Stasis
+                new_world[cell_pos.x + cell_pos.y*WORLD_DIMENSION].cell_type = PREY;
+            }
+            else if(neighboors_cells < 2){
+                // Die Loliness
+                new_world[cell_pos.x + cell_pos.y*WORLD_DIMENSION].cell_type = EMPTY;
+            }
+            else if( neighboors_cells > 3){
+                // Overcrowding
+                new_world[cell_pos.x + cell_pos.y*WORLD_DIMENSION].cell_type = EMPTY;
+            }
+        }
+    else if(old_world[cell_pos.x + cell_pos.y*WORLD_DIMENSION].cell_type == PREDATOR ){
+        // Rules predator
+        if(neighboors_cells == 2){
+                // Stasis
+                new_world[cell_pos.x + cell_pos.y*WORLD_DIMENSION].cell_type = PREDATOR;
+            }
+            else if(neighboors_cells < 2){
+                // Die Loliness
+                new_world[cell_pos.x + cell_pos.y*WORLD_DIMENSION].cell_type = EMPTY;
+            }
+            else if( neighboors_cells > 3){
+                // Overcrowding
+                new_world[cell_pos.x + cell_pos.y*WORLD_DIMENSION].cell_type = EMPTY;
+            }
+    }
 }
 
 
