@@ -13,12 +13,20 @@ World::World(){
     } 
 
     // Spawn preys
-    int n_preys = 1;
+    int n_preys = 50;
     for (int i = 0; i < n_preys ; i++){
         int random_coord = rand()%(dimension_x*dimension_y);
         // Initialize 
-        world[i].cell_type = PREY;
-        world[i].t_reproduce = 0;
+        world[random_coord].cell_type = PREY;
+        world[random_coord].t_reproduce = 0;
+    }
+
+    int n_predator = 3;
+    for (int i = 0; i < n_predator ; i++){
+        int random_coord = rand()%(dimension_x*dimension_y);
+        // Initialize 
+        world[random_coord] = { PREDATOR, 0, 500 };
+        
     }
 }
 
@@ -28,11 +36,12 @@ void World::process(){
         Vector2 from = {i%dimension_x, i/dimension_x };
         switch (world[i].cell_type){
             case PREDATOR:
-                moveAgent(world, world[i], from, randomCell(from.x, from.y) );
+                processPredator(world, &world[i],  from);
+                //moveAgent(world, world[i], from, randomCell(from.x, from.y) );
                 break;
             case PREY:
                 processPrey(world, &world[i],  from);
-                moveAgent(world, world[i], from, randomCell(from.x, from.y) );
+                //moveAgent(world, world[i], from, randomCell(from.x, from.y) );
                 break;
         }
     }
