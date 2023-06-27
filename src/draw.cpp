@@ -5,7 +5,6 @@ Draw::Draw(sf::RenderWindow *w){
     Draw::window = w;
 }
 
-
 void Draw::renderPrey(int x, int y){
     sf::CircleShape sprite(50);
     sprite.scale(sf::Vector2f(0.1f,0.1f));
@@ -74,14 +73,4 @@ void Draw::render(Agent* world){
             break;
         }
     }
-    
 }
-
-/*
-void renderState(int n_preys){
-    std::string s = std::to_string( n_preys );
-    sf::Text text("Preys: " + s , font, 30);
-    text.setFillColor(sf::Color::White);
-    Draw::window->draw(text);
-}
-*/

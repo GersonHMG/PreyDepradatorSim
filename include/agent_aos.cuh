@@ -1,8 +1,13 @@
 #pragma once
 
 #include <iostream>
-
+#include "config.hpp"
+#include "cuda_runtime.h"
 #include "utils.hpp"
+
+__host__ __device__ int mod(int a, int b) { 
+    return (a % b + b) % b; 
+}
 
 enum CELL_TYPE { EMPTY, PREDATOR, PREY };
 
@@ -12,12 +17,7 @@ struct Agent{
     int hungry; //predator hungry
 };
 
-Vector2 randomCell(int x, int y);
 
-void processPrey(Agent* world, Agent* prey, Vector2 pos);
 
-void processPredator(Agent* world, Agent* prey, Vector2 pos);
 
-bool spawnAgent(Agent* world, Agent new_agent, Vector2 to);
 
-#include "world.hpp"

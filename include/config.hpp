@@ -1,12 +1,8 @@
 #pragma once
 
+#define WORLD_DIMENSION  100
 
-namespace Config{
-    // World config
-    const int WORLD_DIMENSION = 100;
-
-    // Screen config
-    const int SCREEN_WIDTH = 800;
-    const int SCREEN_HEIGHT = 800;
-    const int FPS = 60;
-}
+// Screen config
+#define SCREEN_WIDTH  800
+#define SCREEN_HEIGHT  800
+#define FPS  60

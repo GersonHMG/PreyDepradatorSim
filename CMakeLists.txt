@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(PreyDepredatorSim VERSION 1.0.0 LANGUAGES CXX)
+project(PreyDepredatorSim CUDA CXX)
 
 # Default to release builds
 if(NOT CMAKE_BUILD_TYPE)
@@ -9,13 +9,26 @@ endif()
 find_package(SFML 2 REQUIRED COMPONENTS graphics system window)
 find_package(Threads REQUIRED)
 
+if(NOT DEFINED CMAKE_CXX_STANDARD)
+   set(CMAKE_CXX_STANDARD 11)
+   set(CMAKE_CXX_STANDARD_REQUIRED True)
+endif()
+
+if(NOT DEFINED CMAKE_CUDA_STANDARD)
+   set(CMAKE_CUDA_STANDARD 11)
+   set(CMAKE_CUDA_STANDARD_REQUIRED True)
+endif()
+
+
 set(SFML_LIBS sfml-graphics sfml-system sfml-window)
 
 file(GLOB SOURCES src/*.cpp)
-add_executable(${PROJECT_NAME} ${WIN32_GUI} ${SOURCES})
+add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cu)
 target_include_directories(${PROJECT_NAME} PRIVATE "include" "lib")
 set(SFML_LIBS sfml-system sfml-window sfml-graphics)
 target_link_libraries(${PROJECT_NAME} ${SFML_LIBS})
+
+
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 if (UNIX)
    target_link_libraries(${PROJECT_NAME} pthread)
