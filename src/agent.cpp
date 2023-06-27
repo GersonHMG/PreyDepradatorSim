@@ -32,8 +32,6 @@ void processPrey(Agent* world, Agent* prey, Vector2 pos){
     }
     Vector2 to = randomCell(pos.x, pos.y);
     moveAgent(world, *prey, pos, to);
-
-    
 }
 void processPredator(Agent* world, Agent* predator, Vector2 pos){
     predator->t_reproduce += 1;
