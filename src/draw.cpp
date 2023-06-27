@@ -8,7 +8,7 @@ Draw::Draw(sf::RenderWindow *w){
 
 void Draw::renderPrey(int x, int y){
     sf::CircleShape sprite(50);
-    sprite.scale(sf::Vector2f(0.2f,0.2f));
+    sprite.scale(sf::Vector2f(0.1f,0.1f));
     sf::Color prey_color = sf::Color::Green;
     sprite.setFillColor( prey_color );
     // Local to global

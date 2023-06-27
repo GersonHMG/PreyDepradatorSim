@@ -16,6 +16,7 @@ Vector2 randomCell(int x, int y);
 
 void processPrey(Agent* world, Agent* prey, Vector2 pos);
 
+void processPredator(Agent* world, Agent* prey, Vector2 pos);
 
 bool spawnAgent(Agent* world, Agent new_agent, Vector2 to);
 
