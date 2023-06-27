@@ -1,23 +1,20 @@
 #pragma once
 
-#include "prey.hpp"
+#include <iostream>
+
 #include "config.hpp"
-
-
-class Prey;
+#include "agent.hpp"
 
 class World{
     private:
-        int* world;
-        int n_preys;
-        Prey* preys;
+        Agent* world;
         // Render functions
     public:
         World();
         void process();
-        void spawnPrey(Vector2 pos);  
         int dimension_x;
         int dimension_y;
-        Vector2* getPreysPos();
-        int getNPreys();
+        bool moveAgent(Agent* world, Agent agent, Vector2 from, Vector2 to);
+        bool spawnAgent(Agent* world, Agent new_agent, Vector2 to);
+        Agent* getWorld();
 };
