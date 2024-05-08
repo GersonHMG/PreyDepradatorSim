@@ -185,8 +185,8 @@ void test(int version){
 
 int main(){
     std::cout<< "Running..." << std::endl;
-    //mainLoop();
-    test(0);
+    mainLoop();
+    //test(0);
 
     return 0;
 }

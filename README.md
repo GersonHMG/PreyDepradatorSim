@@ -1,5 +1,6 @@
 # PreyDepradatorSim
 
+Proyecto de la universidad, el objetivo era implementar la simulacion de presa vs depredador con cuda y automatas celulares. Se implementaron versiones en cpu y dos en gpu. 
 
 Requisitos
 
@@ -10,3 +11,12 @@ Requisitos
 
 ## Antes de ejecutar:
 Verificar si se tiene los 3 dll (sfml-graphics-d-2.dll, sfml-window-d-2.dll, sfml-system-d-2.dll) en la misma carpeta de los binarios
+
+## Como correrlo
+
+``` mkdir build
+cd build
+cmake ..
+cmake --build .
+```
+Mover el ejecutable PreyDepredatorSim.exe (build/Debug/PreyDepredatorSim.exe ) a la carpeta build (donde estan los .dll de sfml)
